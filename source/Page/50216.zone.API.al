@@ -1,14 +1,18 @@
-page 50202 "Bin Type API"
+namespace MiOneBrands.WarehouseBinAssignment;
+
+using Microsoft.Warehouse.Structure;
+
+page 50216 "Zone API"
 {
     PageType = API;
     APIPublisher = 'mioneBrands';
     APIGroup = 'warehouse';
     APIVersion = 'v1.0';
 
-    EntityName = 'binType';
-    EntitySetName = 'binTypes';
+    EntityName = 'zone';
+    EntitySetName = 'zones';
 
-    SourceTable = "Bin Type";
+    SourceTable = Zone;
     ODataKeyFields = SystemId;
     DelayedInsert = true;
 
@@ -17,7 +21,7 @@ page 50202 "Bin Type API"
     ModifyAllowed = false;
     DeleteAllowed = false;
 
-    Caption = 'Bin Type API';
+    Caption = 'Zone API';
 
     layout
     {
@@ -30,6 +34,11 @@ page 50202 "Bin Type API"
                     Caption = 'Id';
                 }
 
+                field(locationCode; Rec."Location Code")
+                {
+                    Caption = 'Location Code';
+                }
+
                 field(code; Rec.Code)
                 {
                     Caption = 'Code';
@@ -40,24 +49,29 @@ page 50202 "Bin Type API"
                     Caption = 'Description';
                 }
 
-                field(receive; Rec.Receive)
+                field(binTypeCode; Rec."Bin Type Code")
                 {
-                    Caption = 'Receive';
+                    Caption = 'Bin Type Code';
                 }
 
-                field(ship; Rec.Ship)
+                field(warehouseClassCode; Rec."Warehouse Class Code")
                 {
-                    Caption = 'Ship';
+                    Caption = 'Warehouse Class Code';
                 }
 
-                field(putAway; Rec."Put Away")
+                field(specialEquipmentCode; Rec."Special Equipment Code")
                 {
-                    Caption = 'Put Away';
+                    Caption = 'Special Equipment Code';
                 }
 
-                field(pick; Rec.Pick)
+                field(zoneRanking; Rec."Zone Ranking")
                 {
-                    Caption = 'Pick';
+                    Caption = 'Zone Ranking';
+                }
+
+                field(crossDockBinZone; Rec."Cross-Dock Bin Zone")
+                {
+                    Caption = 'Cross-Dock Bin Zone';
                 }
 
                 field(lastModifiedDateTime; Rec.SystemModifiedAt)

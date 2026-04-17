@@ -1,4 +1,9 @@
-page 50201 "Bin Content API"
+namespace MiOneBrands.WarehouseBinAssignment;
+
+using Microsoft.Warehouse.Structure;
+using Microsoft.Inventory.Item;
+
+page 50214 "Bin Content API"
 {
     PageType = API;
     APIPublisher = 'mioneBrands';
@@ -50,6 +55,11 @@ page 50201 "Bin Content API"
                     Caption = 'Item No.';
                 }
 
+                field(itemInternalId; ItemInternalId)
+                {
+                    Caption = 'Item Internal Id';
+                }
+
                 field(variantCode; Rec."Variant Code")
                 {
                     Caption = 'Variant Code';
@@ -97,4 +107,16 @@ page 50201 "Bin Content API"
             }
         }
     }
+
+    trigger OnAfterGetRecord()
+    var
+        Item: Record Item;
+    begin
+        Clear(ItemInternalId);
+        if Item.Get(Rec."Item No.") then
+            ItemInternalId := Item.SystemId;
+    end;
+
+    var
+        ItemInternalId: Guid;
 }
