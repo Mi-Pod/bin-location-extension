@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PermissionSets>
+  <PermissionSet RoleID="MIB-BIN-EDIT" RoleName="MIB Bin Assignment Edit" Scope="Tenant" Assignable="true">
+    <!-- Tables: full RIMD -->
+    <Permission>
+      <ObjectType>TableData</ObjectType><ObjectID>50202</ObjectID>
+      <ReadPermission>Yes</ReadPermission><InsertPermission>Yes</InsertPermission>
+      <ModifyPermission>Yes</ModifyPermission><DeletePermission>Yes</DeletePermission>
+      <ExecutePermission>No</ExecutePermission>
+    </Permission>
+    <Permission>
+      <ObjectType>TableData</ObjectType><ObjectID>50203</ObjectID>
+      <ReadPermission>Yes</ReadPermission><InsertPermission>Yes</InsertPermission>
+      <ModifyPermission>Yes</ModifyPermission><DeletePermission>Yes</DeletePermission>
+      <ExecutePermission>No</ExecutePermission>
+    </Permission>
+    <Permission>
+      <ObjectType>TableData</ObjectType><ObjectID>50204</ObjectID>
+      <ReadPermission>Yes</ReadPermission><InsertPermission>Yes</InsertPermission>
+      <ModifyPermission>Yes</ModifyPermission><DeletePermission>Yes</DeletePermission>
+      <ExecutePermission>No</ExecutePermission>
+    </Permission>
+    <Permission>
+      <ObjectType>TableData</ObjectType><ObjectID>50205</ObjectID>
+      <ReadPermission>Yes</ReadPermission><InsertPermission>Yes</InsertPermission>
+      <ModifyPermission>Yes</ModifyPermission><DeletePermission>Yes</DeletePermission>
+      <ExecutePermission>No</ExecutePermission>
+    </Permission>
+    <!-- Codeunits -->
+    <Permission>
+      <ObjectType>Codeunit</ObjectType><ObjectID>50220</ObjectID>
+      <ReadPermission>No</ReadPermission><InsertPermission>No</InsertPermission>
+      <ModifyPermission>No</ModifyPermission><DeletePermission>No</DeletePermission>
+      <ExecutePermission>Yes</ExecutePermission>
+    </Permission>
+    <Permission>
+      <ObjectType>Codeunit</ObjectType><ObjectID>50221</ObjectID>
+      <ReadPermission>No</ReadPermission><InsertPermission>No</InsertPermission>
+      <ModifyPermission>No</ModifyPermission><DeletePermission>No</DeletePermission>
+      <ExecutePermission>Yes</ExecutePermission>
+    </Permission>
+    <Permission>
+      <ObjectType>Codeunit</ObjectType><ObjectID>50222</ObjectID>
+      <ReadPermission>No</ReadPermission><InsertPermission>No</InsertPermission>
+      <ModifyPermission>No</ModifyPermission><DeletePermission>No</DeletePermission>
+      <ExecutePermission>Yes</ExecutePermission>
+    </Permission>
+    <!-- Pages: full access -->
+    <Permission>
+      <ObjectType>Page</ObjectType><ObjectID>50240</ObjectID>
+      <ReadPermission>Yes</ReadPermission><InsertPermission>Yes</InsertPermission>
+      <ModifyPermission>Yes</ModifyPermission><DeletePermission>Yes</DeletePermission>
+      <ExecutePermission>Yes</ExecutePermission>
+    </Permission>
+    <Permission>
+      <ObjectType>Page</ObjectType><ObjectID>50241</ObjectID>
+      <ReadPermission>Yes</ReadPermission><InsertPermission>Yes</InsertPermission>
+      <ModifyPermission>Yes</ModifyPermission><DeletePermission>Yes</DeletePermission>
+      <ExecutePermission>Yes</ExecutePermission>
+    </Permission>
+    <Permission>
+      <ObjectType>Page</ObjectType><ObjectID>50242</ObjectID>
+      <ReadPermission>Yes</ReadPermission><InsertPermission>Yes</InsertPermission>
+      <ModifyPermission>Yes</ModifyPermission><DeletePermission>Yes</DeletePermission>
+      <ExecutePermission>Yes</ExecutePermission>
+    </Permission>
+    <Permission>
+      <ObjectType>Page</ObjectType><ObjectID>50243</ObjectID>
+      <ReadPermission>Yes</ReadPermission><InsertPermission>Yes</InsertPermission>
+      <ModifyPermission>Yes</ModifyPermission><DeletePermission>Yes</DeletePermission>
+      <ExecutePermission>Yes</ExecutePermission>
+    </Permission>
+    <Permission>
+      <ObjectType>Page</ObjectType><ObjectID>50244</ObjectID>
+      <ReadPermission>Yes</ReadPermission><InsertPermission>Yes</InsertPermission>
+      <ModifyPermission>Yes</ModifyPermission><DeletePermission>Yes</DeletePermission>
+      <ExecutePermission>Yes</ExecutePermission>
+    </Permission>
+    <Permission>
+      <ObjectType>Page</ObjectType><ObjectID>50246</ObjectID>
+      <ReadPermission>Yes</ReadPermission><InsertPermission>Yes</InsertPermission>
+      <ModifyPermission>Yes</ModifyPermission><DeletePermission>Yes</DeletePermission>
+      <ExecutePermission>Yes</ExecutePermission>
+    </Permission>
+  </PermissionSet>
+</PermissionSets>
