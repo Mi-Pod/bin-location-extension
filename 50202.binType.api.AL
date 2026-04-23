@@ -1,8 +1,4 @@
-namespace MiOneBrands.WarehouseBinAssignment;
-
-using Microsoft.Warehouse.Structure;
-
-page 50215 "Bin Type API"
+page 50202 "Bin Type API"
 {
     PageType = API;
     APIPublisher = 'mioneBrands';
