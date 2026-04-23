@@ -2,17 +2,17 @@ namespace MiOneBrands.WarehouseBinAssignment;
 
 using Microsoft.Warehouse.Structure;
 
-page 50216 "Zone API"
+page 50217 "Bin API"
 {
     PageType = API;
     APIPublisher = 'mioneBrands';
     APIGroup = 'warehouse';
     APIVersion = 'v1.0';
 
-    EntityName = 'zone';
-    EntitySetName = 'zones';
+    EntityName = 'bin';
+    EntitySetName = 'bins';
 
-    SourceTable = Zone;
+    SourceTable = Bin;
     ODataKeyFields = SystemId;
     DelayedInsert = true;
 
@@ -21,7 +21,7 @@ page 50216 "Zone API"
     ModifyAllowed = false;
     DeleteAllowed = false;
 
-    Caption = 'Zone API';
+    Caption = 'Bin API';
 
     layout
     {
@@ -37,6 +37,11 @@ page 50216 "Zone API"
                 field(locationCode; Rec."Location Code")
                 {
                     Caption = 'Location Code';
+                }
+
+                field(zoneCode; Rec."Zone Code")
+                {
+                    Caption = 'Zone Code';
                 }
 
                 field(code; Rec.Code)
@@ -64,14 +69,39 @@ page 50216 "Zone API"
                     Caption = 'Special Equipment Code';
                 }
 
-                field(zoneRanking; Rec."Zone Ranking")
+                field(binRanking; Rec."Bin Ranking")
                 {
-                    Caption = 'Zone Ranking';
+                    Caption = 'Bin Ranking';
                 }
 
-                field(crossDockBinZone; Rec."Cross-Dock Bin Zone")
+                field(maximumCubage; Rec."Maximum Cubage")
                 {
-                    Caption = 'Cross-Dock Bin Zone';
+                    Caption = 'Maximum Cubage';
+                }
+
+                field(maximumWeight; Rec."Maximum Weight")
+                {
+                    Caption = 'Maximum Weight';
+                }
+
+                field(blockMovement; Rec."Block Movement")
+                {
+                    Caption = 'Block Movement';
+                }
+
+                field(crossDockBin; Rec."Cross-Dock Bin")
+                {
+                    Caption = 'Cross-Dock Bin';
+                }
+
+                field(empty; Rec.Empty)
+                {
+                    Caption = 'Empty';
+                }
+
+                field(dedicated; Rec.Dedicated)
+                {
+                    Caption = 'Dedicated';
                 }
 
                 field(lastModifiedDateTime; Rec.SystemModifiedAt)
