@@ -5,3 +5,7 @@ source/.alpackages/Microsoft_System Application_27.4.45366.46663.app
 source/.alpackages/Microsoft_System_27.0.47816.0.app
 source/Mi-One Brands_Mi-One Brands Bin Location Extension_1.0.0.0.app
 *.app
+.schemas
+.alpackages
+.vscode/launch.json
+.vscode/rad.json
