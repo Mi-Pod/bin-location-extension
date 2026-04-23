@@ -1,0 +1,15 @@
+`Document_Type,No,Sell_to_Customer_No,Sell_to_Customer_Name,Document_Date,Posting_Date,Order_Date,Due_Date,External_Document_No,Salesperson_Code,Responsibility_Center,Assigned_User_ID,Status,Ship_to_Code,Ship_to_Name,Ship_to_Name_2,Ship_to_Address,Ship_to_Address_2,Ship_to_City,Ship_to_County,Ship_to_Post_Code,Ship_to_Country_Region_Code,Ship_to_Phone_No,Ship_to_Contact,Shipment_Method_Code,Shipping_Agent_Code,Shipping_Agent_Service_Code,Package_Tracking_No,Location_Code,Gen_Bus_Posting_Group,Customer_Posting_Group,Payment_Terms_Code,Payment_Method_Code`
+
+    
+
+`documentType,documentNo,lineNo,type,no,description,locationCode,binCode,quantity,qtyToShip,unitOfMeasureCode,lineAmount,outstandingQuantity`
+
+
+
+
+`No,Description,Blocked,Type,Base_Unit_of_Measure,Last_Date_Modified,Item_Category_Code,Item_Category_Description,Sales_Unit_of_Measure,Replenishment_System,Assembly_Policy,AssemblyBOM`
+
+
+
+ASSEMBLY
+NEED BIN

@@ -6,7 +6,7 @@
       "request": "launch",
       "type": "al",
       "environmentType": "Sandbox",
-      "environmentName": "ProdCopy_20260220",
+      "environmentName": "ProdCopy_20260401",
       "tenant": "3ec46f9b-46f8-4406-8b79-f04d7c2b72f4",
       "startupObjectId": 22,
       "startupObjectType": "Page",
