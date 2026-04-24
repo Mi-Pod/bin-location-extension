@@ -4,19 +4,15 @@ page 50202 "Bin Type API"
     APIPublisher = 'mioneBrands';
     APIGroup = 'warehouse';
     APIVersion = 'v1.0';
-
     EntityName = 'binType';
     EntitySetName = 'binTypes';
-
     SourceTable = "Bin Type";
     ODataKeyFields = SystemId;
     DelayedInsert = true;
-
     Editable = false;
     InsertAllowed = false;
     ModifyAllowed = false;
     DeleteAllowed = false;
-
     Caption = 'Bin Type API';
 
     layout
@@ -29,37 +25,30 @@ page 50202 "Bin Type API"
                 {
                     Caption = 'Id';
                 }
-
                 field(code; Rec.Code)
                 {
                     Caption = 'Code';
                 }
-
                 field(description; Rec.Description)
                 {
                     Caption = 'Description';
                 }
-
                 field(receive; Rec.Receive)
                 {
                     Caption = 'Receive';
                 }
-
                 field(ship; Rec.Ship)
                 {
                     Caption = 'Ship';
                 }
-
                 field(putAway; Rec."Put Away")
                 {
                     Caption = 'Put Away';
                 }
-
                 field(pick; Rec.Pick)
                 {
                     Caption = 'Pick';
                 }
-
                 field(lastModifiedDateTime; Rec.SystemModifiedAt)
                 {
                     Caption = 'Last Modified Date Time';
