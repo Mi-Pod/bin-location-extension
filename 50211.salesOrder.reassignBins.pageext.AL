@@ -88,12 +88,7 @@ pageextension 50211 "Sales Order Reassign Bins" extends "Sales Order"
                         Issues.Get(i, IssueToken);
                         if IssueToken.IsObject() then begin
                             IssueJson := IssueToken.AsObject();
-                            IssuesText += StrSubstNo('- [%1] %2 | Item %3 | Bin %4 | RC %5\  %6\',
-                                GetJsonText(IssueJson, 'id'),
-                                GetJsonText(IssueJson, 'type'),
-                                GetJsonText(IssueJson, 'item_number'),
-                                GetJsonText(IssueJson, 'binCode'),
-                                GetJsonText(IssueJson, 'responsibility_center'),
+                            IssuesText += StrSubstNo('- %1',
                                 GetJsonText(IssueJson, 'message'));
                         end;
                     end;
