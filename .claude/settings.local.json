@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\dwalt\\\\Desktop\\\\Code\\\\Work V3\\\\bin-location-extension\" -Recurse -File)",
+      "Bash(Select-Object -Property FullName, Length)",
+      "Bash(ConvertTo-Json)",
+      "Bash(Out-String)"
+    ]
+  }
+}
