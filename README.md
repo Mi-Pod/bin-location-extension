@@ -31,7 +31,7 @@ All endpoints are under the base path:
 
 | Endpoint | Source Table | Description |
 |---|---|---|
-| `binContents` | Bin Content | Bin inventory levels by location, zone, item, and variant |
+| `binContents` | Bin Content | Bin inventory levels by location, zone, item, and variant, including `minQty` / `maxQty` |
 | `binTypes` | Bin Type | Bin type master (receive, ship, put-away, pick flags) |
 | `zones` | Zone | Warehouse zone master data |
 | `assemblyLinks` | Assemble-to-Order Link | ATO linkage between assembly headers and sales lines |
@@ -44,7 +44,13 @@ All endpoints are under the base path:
 | `salesLine_wBins` | Sales Line | `binCode` — triggers ATO sync on change |
 | `assemblyLines` | Assembly Line | `binCode` — triggers ATO sync on change |
 
-### Command Endpoint
+### Command Endpoints
+
+| Endpoint | Buffer Table | Description |
+|---|---|---|
+| `binReassignments` | Bin Reassignment Buffer | Assign a bin to a sales line or assembly line (below) |
+| `binLevels` | WMS Bin Level Buffer | Set Min. Qty. / Max. Qty. on a Bin Content, creating a Fixed Bin Content if none exists (#7) |
+
 
 **`POST /api/mioneBrands/warehouse/v1.0/companies({id})/binReassignments`**
 
@@ -69,6 +75,30 @@ Assign a bin to a sales line or assembly line by GUID.
 ```
 
 The response includes a `result` field with a confirmation message. Requests are not persisted to the database.
+
+**`POST /api/mioneBrands/warehouse/v1.0/companies({id})/binLevels`**
+
+Set the replenishment min/max for an item in a bin. Retry-safe: the same `externalRequestKey` with the same payload replays the first response; with a different payload it errors.
+
+```json
+{
+  "externalRequestKey": "{unique-key}",
+  "createdBy": "jdoe",
+  "locationCode": "MAIN",
+  "binCode": "FP-14-25",
+  "itemNo": "1000",
+  "variantCode": "",
+  "unitOfMeasureCode": "",
+  "minQty": 5,
+  "maxQty": 20,
+  "fixed": true,
+  "allowOtherFixedItem": false
+}
+```
+
+Only `externalRequestKey`, `locationCode`, `binCode`, `itemNo`, `minQty` and `maxQty` are needed. `unitOfMeasureCode` defaults to the item's base unit, `fixed` to `true`, `allowOtherFixedItem` to `false`. Send `minQty` 0 and `maxQty` 0 to clear the rule; the Bin Content is kept. Quantities in the bin are never changed.
+
+The response echoes the stored values plus `binContentId`, `lastModifiedDateTime` and `result`. Requests fail if the bin is blocked, dedicated, the location's adjustment bin, or already Fixed to another item/variant (unless `allowOtherFixedItem` is `true`), or if `minQty` > `maxQty`.
 
 ---
 
@@ -123,3 +153,7 @@ The response is displayed in a modal showing:
 | 50209 | Enum | Bin Reassignment Target Type |
 | 50210 | Page (API) | Bin Reassignment API |
 | 50211 | Page Extension | Sales Order Reassign Bins |
+| 50217 | Table | WMS Bin Level Buffer |
+| 50217 | Codeunit | WMS Bin Level Management |
+| 50218 | Codeunit | WMS Bin Rules |
+| 50219 | Page (API) | WMS Bin Level API |

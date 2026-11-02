@@ -10,7 +10,7 @@ permissionset 50216 "WMS Integration"
         tabledata "WMS Document Request" = RIM,
         table "WMS Document Request" = X,
         tabledata Bin = R,
-        tabledata "Bin Content" = R,
+        tabledata "Bin Content" = RIM,
         tabledata "Bin Type" = R,
         tabledata Zone = R,
         tabledata Location = R,
@@ -31,5 +31,11 @@ permissionset 50216 "WMS Integration"
         page "Bin Reassignment API" = X,
         page "WMS Bin API" = X,
         page "WMS Location API" = X,
-        page "WMS Document Request API" = X;
+        page "WMS Document Request API" = X,
+        tabledata "Item Variant" = R,
+        tabledata "Item Unit of Measure" = R,
+        table "WMS Bin Level Buffer" = X,
+        codeunit "WMS Bin Level Management" = X,
+        codeunit "WMS Bin Rules" = X,
+        page "WMS Bin Level API" = X;
 }
