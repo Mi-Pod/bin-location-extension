@@ -36,6 +36,8 @@ All endpoints are under the base path:
 | `zones` | Zone | Warehouse zone master data |
 | `assemblyLinks` | Assemble-to-Order Link | ATO linkage between assembly headers and sales lines |
 | `assemblyHeaders` | Assembly Header | Full assembly order header data including bin code, quantities, and dates |
+| `warehouseActivityLines` | Warehouse Activity Line | Open activity lines (Take/Place pairs) with qty. to handle/outstanding/handled and the WMS internal movement link fields |
+| `registeredInvtMovementLines` | Registered Invt. Movement Line | Registered inventory movement lines with the original inventory movement no., registering date and the WMS link fields |
 
 ### Editable Endpoints
 
@@ -69,6 +71,39 @@ Assign a bin to a sales line or assembly line by GUID.
 ```
 
 The response includes a `result` field with a confirmation message. Requests are not persisted to the database.
+
+### WMS Movement Commands
+
+Both commands are retry-safe: the same `externalRequestKey` with the same payload replays the first response (see `wmsDocumentRequests`). Quantities are in base units. Nothing is committed unless the whole request succeeds.
+
+| Endpoint | Page | Description |
+|---|---|---|
+| `POST movements` | 50220 WMS Movement API | Creates an Internal Movement and turns it into an Inventory Movement. Fails as a whole if any source bin is short or an item uses warehouse lot/serial/package tracking. |
+| `POST qtyToHandles` | 50221 WMS Qty. to Handle API | Sets Qty. to Handle on an inventory movement Take line and its Place line. Never registers. |
+
+**Create a movement:**
+```json
+{
+  "externalRequestKey": "repl-2026-11-02-0001",
+  "createdBy": "jdoe",
+  "locationCode": "MAIN",
+  "linesJson": "[{\"itemNo\":\"1000\",\"variantCode\":\"\",\"fromBinCode\":\"BULK-01\",\"toBinCode\":\"FP-14-25\",\"quantityBase\":24}]"
+}
+```
+The response returns `internalMovementNo`, `activityNo` and `responseJson`, which lists `sourceLineNo`, `itemNo`, `takeLineNo`, `placeLineNo` and `quantityBase` per created Take line.
+
+**Set Qty. to Handle:**
+```json
+{
+  "externalRequestKey": "qth-2026-11-02-0001",
+  "createdBy": "jdoe",
+  "activityNo": "IM000012",
+  "takeLineNo": 10000,
+  "qtyToHandleBase": 12,
+  "expectedLastModifiedDateTime": "2026-11-02T17:05:00Z"
+}
+```
+`expectedLastModifiedDateTime` is optional. When sent, the request fails if either line changed in BC after that time.
 
 ---
 
@@ -123,3 +158,14 @@ The response is displayed in a modal showing:
 | 50209 | Enum | Bin Reassignment Target Type |
 | 50210 | Page (API) | Bin Reassignment API |
 | 50211 | Page Extension | Sales Order Reassign Bins |
+| 50220 | Table | WMS Movement Buffer |
+| 50221 | Table | WMS Qty. to Handle Buffer |
+| 50220 | Codeunit | WMS Movement Management |
+| 50221 | Codeunit | WMS Movement Events |
+| 50220 | Table Extension | WMS Whse. Activity Line |
+| 50221 | Table Extension | WMS Reg. Invt. Movement Line |
+| 50222 | Table Extension | WMS Internal Movement Line |
+| 50220 | Page (API) | WMS Movement API |
+| 50221 | Page (API) | WMS Qty. to Handle API |
+| 50222 | Page (API) | WMS Activity Line API |
+| 50223 | Page (API) | WMS Reg. Invt. Mvmt. Line API |

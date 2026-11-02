@@ -31,5 +31,24 @@ permissionset 50216 "WMS Integration"
         page "Bin Reassignment API" = X,
         page "WMS Bin API" = X,
         page "WMS Location API" = X,
-        page "WMS Document Request API" = X;
+        page "WMS Document Request API" = X,
+        // #5 movements
+        tabledata "Internal Movement Header" = RIMD,
+        tabledata "Internal Movement Line" = RIMD,
+        tabledata "Warehouse Activity Header" = RIMD,
+        tabledata "Warehouse Activity Line" = RIMD,
+        tabledata "Registered Invt. Movement Hdr." = R,
+        tabledata "Registered Invt. Movement Line" = R,
+        tabledata "Inventory Setup" = R,
+        tabledata "Warehouse Employee" = R,
+        tabledata "Item Tracking Code" = R,
+        tabledata "Whse. Item Tracking Line" = R,
+        table "WMS Movement Buffer" = X,
+        table "WMS Qty. to Handle Buffer" = X,
+        codeunit "WMS Movement Management" = X,
+        codeunit "WMS Movement Events" = X,
+        page "WMS Movement API" = X,
+        page "WMS Qty. to Handle API" = X,
+        page "WMS Activity Line API" = X,
+        page "WMS Reg. Invt. Mvmt. Line API" = X;
 }
