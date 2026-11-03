@@ -9,7 +9,7 @@ permissionset 50216 "WMS Integration"
     Permissions =
         tabledata "WMS Document Request" = RIM,
         table "WMS Document Request" = X,
-        tabledata Bin = R,
+        tabledata Bin = RIM,
         tabledata "Bin Content" = RIM,
         tabledata "Bin Type" = R,
         tabledata Zone = R,
@@ -59,5 +59,9 @@ permissionset 50216 "WMS Integration"
         page "WMS Movement API" = X,
         page "WMS Qty. to Handle API" = X,
         page "WMS Activity Line API" = X,
-        page "WMS Reg. Invt. Mvmt. Line API" = X;
+        page "WMS Reg. Invt. Mvmt. Line API" = X,
+        // #4 bin setup
+        table "WMS Bin Setup Buffer" = X,
+        codeunit "WMS Bin Setup Management" = X,
+        page "WMS Bin Setup API" = X;
 }

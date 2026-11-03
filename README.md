@@ -52,6 +52,7 @@ All endpoints are under the base path:
 |---|---|---|
 | `binReassignments` | Bin Reassignment Buffer | Assign a bin to a sales line or assembly line (below) |
 | `binLevels` | WMS Bin Level Buffer | Set Min. Qty. / Max. Qty. on a Bin Content, creating a Fixed Bin Content if none exists (#7) |
+| `binSetups` | WMS Bin Setup Buffer | Create a missing bin from a template bin and/or make an item Fixed / Default in a bin (#4) |
 
 
 **`POST /api/mioneBrands/warehouse/v1.0/companies({id})/binReassignments`**
@@ -102,6 +103,54 @@ Only `externalRequestKey`, `locationCode`, `binCode`, `itemNo`, `minQty` and `ma
 
 The response echoes the stored values plus `binContentId`, `lastModifiedDateTime` and `result`. Requests fail if the bin is blocked, dedicated, the location's adjustment bin, or if `minQty` > `maxQty`. If the item isn't already Fixed in the bin and another item/variant is, the request also fails unless `allowOtherFixedItem` is `true`. Bins shared by several Fixed items can always have each item's levels set.
 
+**`POST /api/mioneBrands/warehouse/v1.0/companies({id})/binSetups`**
+
+Create a bin that doesn't exist yet and/or assign an item to a bin. Retry-safe like `binLevels`.
+
+```json
+{
+  "externalRequestKey": "{unique-key}",
+  "createdBy": "jdoe",
+  "locationCode": "MAIN",
+  "binCode": "FP-14-26",
+  "templateBinCode": "FP-14-25",
+  "description": "Pick face 14-26",
+  "itemNo": "1000",
+  "variantCode": "",
+  "unitOfMeasureCode": "",
+  "fixed": true,
+  "default": true,
+  "replaceDefault": false,
+  "allowOtherFixedItem": false
+}
+```
+
+Only `externalRequestKey`, `locationCode` and `binCode` are always needed. Defaults: `unitOfMeasureCode` the item's base unit, `fixed` `true`, `default`, `replaceDefault` and `allowOtherFixedItem` `false`.
+
+Response (besides the request fields):
+```json
+{
+  "binId": "{bin-system-id}",
+  "binCreated": true,
+  "binContentId": "{bin-content-system-id}",
+  "binContentCreated": true,
+  "defaultMovedFromBinCode": "",
+  "fixed": true,
+  "default": true,
+  "lastModifiedDateTime": "2026-11-02T17:05:00Z",
+  "result": "Bin FP-14-26 created in location MAIN from template FP-14-25. Item 1000 variant '' (PCS) in bin FP-14-26: Fixed Yes, Default Yes."
+}
+```
+
+Rules:
+- **Location:** must be Bin Mandatory and not use Directed Put-away and Pick.
+- **New bin:** if `binCode` doesn't exist, `templateBinCode` is required and must be a bin in the same location that is not Dedicated and not the adjustment bin. The new bin copies Zone Code, Bin Type Code, Warehouse Class Code, Bin Ranking, Special Equipment Code, Maximum Cubage, Maximum Weight and Cross-Dock Bin from it. It gets `description` (else blank), and is never blocked or Dedicated.
+- **Existing bin:** never changed; `templateBinCode` and `description` are ignored and `binCreated` is `false`.
+- **No `itemNo`:** only the bin is set up. `binContentId` is `null` and `fixed`/`default` are `false`. Sending `variantCode`, `unitOfMeasureCode` or `default: true` without `itemNo` fails.
+- **With `itemNo`:** the item must be of type Inventory and the variant and unit of measure must exist. The bin must not be blocked, Dedicated or the adjustment bin. If `fixed` or `default` is requested and another item/variant is already Fixed in the bin, the request fails unless `allowOtherFixedItem` is `true` (same rule as `binLevels`).
+- **Bin Content:** created if missing with the requested flags. On an existing one, the requested flags are only *added*: Fixed and Default are never cleared and quantities never change. `fixed` and `default` in the response are the Bin Content's flags after the request.
+- **Default:** BC proposes an item's Default bin on purchase/sales lines and put-aways, and allows one per item/variant per location. If another bin is already the Default, the request fails naming that bin, unless `replaceDefault` is `true`; then that bin loses its Default and `defaultMovedFromBinCode` names it.
+
 ### WMS Movement Commands
 
 Both commands are retry-safe: the same `externalRequestKey` with the same payload replays the first response (see `wmsDocumentRequests`). Quantities are in base units. Nothing is committed unless the whole request succeeds.
@@ -142,7 +191,7 @@ The response returns `internalMovementNo`, `activityNo` and `responseJson`, whic
 - **Warehouse Employee:** the BC user that *makes the call* must be a Warehouse Employee at the location, or `POST movements` fails with `You cannot use Location Code ...`. For service-to-service calls that is the app registration's own BC user (see Microsoft Entra Applications); for delegated calls it is the signed-in user.
 - **Permissions:** assign the **WMS Integration** permission set to that user.
 
-`wmsDocumentRequests.workflowType` returns `Replenishment`, `QtyToHandle` or `BinLevels` (later also `BinSetup`, `MissingBinFill`, `PutAway`).
+`wmsDocumentRequests.workflowType` returns `Replenishment`, `QtyToHandle`, `BinLevels` or `BinSetup` (later also `MissingBinFill`, `PutAway`). For `BinSetup`, `targetId` is the Bin Content's SystemId, or the Bin's when no item was sent.
 
 ---
 
@@ -212,3 +261,6 @@ The response is displayed in a modal showing:
 | 50221 | Page (API) | WMS Qty. to Handle API |
 | 50222 | Page (API) | WMS Activity Line API |
 | 50223 | Page (API) | WMS Reg. Invt. Mvmt. Line API |
+| 50222 | Table | WMS Bin Setup Buffer |
+| 50222 | Codeunit | WMS Bin Setup Management |
+| 50224 | Page (API) | WMS Bin Setup API |
