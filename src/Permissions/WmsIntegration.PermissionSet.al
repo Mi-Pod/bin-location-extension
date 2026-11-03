@@ -63,5 +63,12 @@ permissionset 50216 "WMS Integration"
         // #4 bin setup
         table "WMS Bin Setup Buffer" = X,
         codeunit "WMS Bin Setup Management" = X,
-        page "WMS Bin Setup API" = X;
+        page "WMS Bin Setup API" = X,
+        // #6 put-away
+        tabledata "Posted Invt. Put-away Header" = R,
+        tabledata "Posted Invt. Put-away Line" = R,
+        table "WMS Put-away Split Buffer" = X,
+        codeunit "WMS Put-away Management" = X,
+        page "WMS Put-away Split API" = X,
+        page "WMS Posted Invt. PA Line API" = X;
 }
