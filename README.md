@@ -67,7 +67,7 @@ Each command is a `POST` to a temporary buffer table; nothing is stored in the b
 | `binLevels` | 50219 WMS Bin Level API | Set Min. Qty. and Max. Qty. on a Bin Content, creating a Fixed Bin Content if none exists. |
 | `binSetups` | 50224 WMS Bin Setup API | Create a missing bin from a template bin, and/or make an item Fixed or Default in a bin. |
 | `movements` | 50220 WMS Movement API | Create an Internal Movement and turn it into an Inventory Movement. |
-| `qtyToHandles` | 50221 WMS Qty. to Handle API | Set Qty. to Handle on an inventory movement Take line and its Place line. |
+| `qtyToHandles` | 50221 WMS Qty. to Handle API | Set Qty. to Handle on an inventory movement Take line and its Place line, or on an inventory put-away Place line. |
 | `putAwaySplits` | 50225 WMS Put-away Split API | Spread one open Place line of an inventory put-away over several destination bins. |
 
 ---
@@ -256,6 +256,8 @@ Set Qty. to Handle on an inventory movement Take line and its paired Place line.
 - `expectedLastModifiedDateTime` is optional. When it is sent, the request fails if either line changed in BC after that time.
 
 The response returns `placeLineNo`, `qtyToHandleBase`, `qtyOutstandingBase`, `qtyHandledBase` and `lastModifiedDateTime`.
+
+**Inventory put-aways.** When `activityNo` / `takeLineNo` is not an inventory movement Take line, the API looks for an **inventory put-away** line instead. It must be a Place line (put-aways from purchase orders have no Take lines); only that line is set. The same rules apply: whole units of the line's unit of measure, no more than outstanding, `expectedLastModifiedDateTime` checked against the line, retries replay. The response's `takeLineNo` and `placeLineNo` are both that line. It never posts the put-away.
 
 ### `POST putAwaySplits`
 
