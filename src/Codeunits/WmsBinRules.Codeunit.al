@@ -32,14 +32,21 @@ codeunit 50218 "WMS Bin Rules"
             Error(BinIsAdjustmentBinErr, BinCode, LocationCode);
     end;
 
-    procedure CheckFixedAssignment(LocationCode: Code[10]; BinCode: Code[20]; ItemNo: Code[20]; VariantCode: Code[10]; AllowOtherItem: Boolean)
+    procedure CheckFixedAssignment(LocationCode: Code[10]; BinCode: Code[20]; ItemNo: Code[20]; VariantCode: Code[10]; UnitOfMeasureCode: Code[10]; AllowOtherItem: Boolean)
     var
         BinContent: Record "Bin Content";
     begin
-        // BC itself lets any number of items be Fixed in one bin; the WMS allows only one
-        // item/variant per bin unless the caller explicitly opts out.
+        // BC itself lets any number of items be Fixed in one bin. The WMS stops an item from
+        // newly becoming Fixed in a bin another item already has, unless the caller opts out.
         if AllowOtherItem then
             exit;
+
+        // Already Fixed here: the request doesn't change who owns the bin, so shared pick
+        // faces (about 20% of Fixed bins in DEV) stay editable.
+        if BinContent.Get(LocationCode, BinCode, ItemNo, VariantCode, UnitOfMeasureCode) then
+            if BinContent.Fixed then
+                exit;
+        Clear(BinContent);
 
         BinContent.SetRange("Location Code", LocationCode);
         BinContent.SetRange("Bin Code", BinCode);

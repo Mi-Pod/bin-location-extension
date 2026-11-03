@@ -100,7 +100,7 @@ Set the replenishment min/max for an item in a bin. Retry-safe: the same `extern
 
 Only `externalRequestKey`, `locationCode`, `binCode`, `itemNo`, `minQty` and `maxQty` are needed. `unitOfMeasureCode` defaults to the item's base unit, `fixed` to `true`, `allowOtherFixedItem` to `false`. Send `minQty` 0 and `maxQty` 0 to clear the rule; the Bin Content is kept. Quantities in the bin are never changed.
 
-The response echoes the stored values plus `binContentId`, `lastModifiedDateTime` and `result`. Requests fail if the bin is blocked, dedicated, the location's adjustment bin, or already Fixed to another item/variant (unless `allowOtherFixedItem` is `true`), or if `minQty` > `maxQty`.
+The response echoes the stored values plus `binContentId`, `lastModifiedDateTime` and `result`. Requests fail if the bin is blocked, dedicated, the location's adjustment bin, or if `minQty` > `maxQty`. If the item isn't already Fixed in the bin and another item/variant is, the request also fails unless `allowOtherFixedItem` is `true`. Bins shared by several Fixed items can always have each item's levels set.
 
 ### WMS Movement Commands
 
@@ -134,6 +134,15 @@ The response returns `internalMovementNo`, `activityNo` and `responseJson`, whic
 }
 ```
 `expectedLastModifiedDateTime` is optional. When sent, the request fails if either line changed in BC after that time.
+
+### Setup for the WMS commands
+
+- **Inventory Setup:** Internal Movement Nos., Inventory Movement Nos. and Registered Invt. Movement Nos. must each point to a series with Default Nos. on.
+- **Location:** Bin Mandatory on and Directed Put-away and Pick off.
+- **Warehouse Employee:** the BC user that *makes the call* must be a Warehouse Employee at the location, or `POST movements` fails with `You cannot use Location Code ...`. For service-to-service calls that is the app registration's own BC user (see Microsoft Entra Applications); for delegated calls it is the signed-in user.
+- **Permissions:** assign the **WMS Integration** permission set to that user.
+
+`wmsDocumentRequests.workflowType` returns `Replenishment`, `QtyToHandle` or `BinLevels` (later also `BinSetup`, `MissingBinFill`, `PutAway`).
 
 ---
 

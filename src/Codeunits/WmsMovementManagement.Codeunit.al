@@ -103,7 +103,7 @@ codeunit 50220 "WMS Movement Management"
             WmsQtyToHandleBuffer."Activity No." + '|' +
             Format(WmsQtyToHandleBuffer."Take Line No.", 0, 9) + '|' +
             Format(WmsQtyToHandleBuffer."Qty. to Handle (Base)", 0, 9));
-        if WmsRequestManagement.FindExisting(WmsQtyToHandleBuffer."External Request Key", "WMS Workflow Type"::"Qty. to Handle", PayloadHash, WmsDocumentRequest) then begin
+        if WmsRequestManagement.FindExisting(WmsQtyToHandleBuffer."External Request Key", "WMS Workflow Type"::QtyToHandle, PayloadHash, WmsDocumentRequest) then begin
             FillQtyToHandleBuffer(WmsQtyToHandleBuffer, WmsDocumentRequest.GetResponse());
             exit;
         end;
@@ -136,7 +136,7 @@ codeunit 50220 "WMS Movement Management"
 
         WmsDocumentRequest.Init();
         WmsDocumentRequest."External Request Key" := WmsQtyToHandleBuffer."External Request Key";
-        WmsDocumentRequest."Workflow Type" := "WMS Workflow Type"::"Qty. to Handle";
+        WmsDocumentRequest."Workflow Type" := "WMS Workflow Type"::QtyToHandle;
         WmsDocumentRequest."Payload Hash" := PayloadHash;
         WmsDocumentRequest."Location Code" := TakeWarehouseActivityLine."Location Code";
         WmsDocumentRequest."Created By" := WmsQtyToHandleBuffer."Created By";

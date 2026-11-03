@@ -32,7 +32,7 @@ codeunit 50217 "WMS Bin Level Management"
         ValidateInput(WmsBinLevelBuffer);
 
         PayloadHash := WmsRequestManagement.ComputePayloadHash(GetCanonicalPayload(WmsBinLevelBuffer));
-        if WmsRequestManagement.FindExisting(WmsBinLevelBuffer."External Request Key", "WMS Workflow Type"::"Bin Levels", PayloadHash, WmsDocumentRequest) then begin
+        if WmsRequestManagement.FindExisting(WmsBinLevelBuffer."External Request Key", "WMS Workflow Type"::BinLevels, PayloadHash, WmsDocumentRequest) then begin
             ApplyResponse(WmsDocumentRequest.GetResponse(), WmsBinLevelBuffer);
             exit;
         end;
@@ -40,7 +40,7 @@ codeunit 50217 "WMS Bin Level Management"
         WmsBinRules.CheckBinUsable(WmsBinLevelBuffer."Location Code", WmsBinLevelBuffer."Bin Code");
         WmsBinRules.CheckFixedAssignment(
             WmsBinLevelBuffer."Location Code", WmsBinLevelBuffer."Bin Code", WmsBinLevelBuffer."Item No.",
-            WmsBinLevelBuffer."Variant Code", WmsBinLevelBuffer."Allow Other Fixed Item");
+            WmsBinLevelBuffer."Variant Code", WmsBinLevelBuffer."Unit of Measure Code", WmsBinLevelBuffer."Allow Other Fixed Item");
 
         WriteBinContent(WmsBinLevelBuffer, BinContent);
 
@@ -56,7 +56,7 @@ codeunit 50217 "WMS Bin Level Management"
 
         WmsDocumentRequest.Init();
         WmsDocumentRequest."External Request Key" := WmsBinLevelBuffer."External Request Key";
-        WmsDocumentRequest."Workflow Type" := "WMS Workflow Type"::"Bin Levels";
+        WmsDocumentRequest."Workflow Type" := "WMS Workflow Type"::BinLevels;
         WmsDocumentRequest."Payload Hash" := PayloadHash;
         WmsDocumentRequest."Location Code" := WmsBinLevelBuffer."Location Code";
         WmsDocumentRequest."Created By" := WmsBinLevelBuffer."Created By";
