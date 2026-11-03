@@ -53,6 +53,14 @@ page 50201 "Bin Content API"
                 {
                     Caption = 'Quantity (Base)';
                 }
+                field(minQty; Rec."Min. Qty.")
+                {
+                    Caption = 'Min. Qty.';
+                }
+                field(maxQty; Rec."Max. Qty.")
+                {
+                    Caption = 'Max. Qty.';
+                }
                 field(fixed; Rec.Fixed)
                 {
                     Caption = 'Fixed';

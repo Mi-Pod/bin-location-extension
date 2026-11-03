@@ -2,7 +2,7 @@
     "id": "b9933085-71d0-4aec-ba31-dd32d445feda",
     "name": "Bin Location Extension",
     "publisher": "Mi-One Brands",
-    "version": "1.0.1.0",
+    "version": "1.2.0.0",
     "brief": "",
     "description": "",
     "privacyStatement": "",
@@ -17,7 +17,7 @@
     "idRanges": [
         {
             "from": 50201,
-            "to": 50250
+            "to": 50249
         }
     ],
     "resourceExposurePolicy": {
