@@ -3,6 +3,8 @@ page 50222 "WMS Activity Line API"
     // Open warehouse activity lines (Take/Place pairs), used to reconcile movements.
     // Lines created by the movements API carry wmsInternalMovementNo and wmsSourceLineNo:
     //   GET .../warehouseActivityLines?$filter=activityType eq 'Invt. Movement' and activityNo eq '{no}'
+    // Inventory put-away lines carry the purchase order in sourceNo / sourceLineNo:
+    //   GET .../warehouseActivityLines?$filter=activityType eq 'Invt. Put-away' and sourceNo eq '{purchase order no.}'
     PageType = API;
     APIPublisher = 'mioneBrands';
     APIGroup = 'warehouse';
@@ -95,6 +97,30 @@ page 50222 "WMS Activity Line API"
                 field(qtyHandledBase; Rec."Qty. Handled (Base)")
                 {
                     Caption = 'Qty. Handled (Base)';
+                }
+                field(sourceType; Rec."Source Type")
+                {
+                    Caption = 'Source Type';
+                }
+                field(sourceSubtype; Rec."Source Subtype")
+                {
+                    Caption = 'Source Subtype';
+                }
+                field(sourceNo; Rec."Source No.")
+                {
+                    Caption = 'Source No.';
+                }
+                field(sourceLineNo; Rec."Source Line No.")
+                {
+                    Caption = 'Source Line No.';
+                }
+                field(sourceDocument; Rec."Source Document")
+                {
+                    Caption = 'Source Document';
+                }
+                field(dueDate; Rec."Due Date")
+                {
+                    Caption = 'Due Date';
                 }
                 field(wmsInternalMovementNo; Rec."WMS Internal Movement No.")
                 {

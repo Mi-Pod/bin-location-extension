@@ -36,8 +36,9 @@ All endpoints are under the base path:
 | `zones` | Zone | Warehouse zone master data |
 | `assemblyLinks` | Assemble-to-Order Link | ATO linkage between assembly headers and sales lines |
 | `assemblyHeaders` | Assembly Header | Full assembly order header data including bin code, quantities, and dates |
-| `warehouseActivityLines` | Warehouse Activity Line | Open activity lines (Take/Place pairs) with qty. to handle/outstanding/handled and the WMS internal movement link fields |
+| `warehouseActivityLines` | Warehouse Activity Line | Open activity lines (Take/Place pairs) with qty. to handle/outstanding/handled, the source document fields (`sourceType`, `sourceSubtype`, `sourceNo`, `sourceLineNo`, `sourceDocument`, `dueDate`) and the WMS internal movement link fields |
 | `registeredInvtMovementLines` | Registered Invt. Movement Line | Registered inventory movement lines with the original inventory movement no., registering date and the WMS link fields |
+| `postedInvtPutAwayLines` | Posted Invt. Put-away Line | Posted inventory put-away lines with the purchase order (`sourceNo` / `sourceLineNo`), bin, quantities, and the original inventory put-away no., posted receipt no. and posting date from the header |
 
 ### Editable Endpoints
 
@@ -104,12 +105,13 @@ The response echoes the stored values plus `binContentId`, `lastModifiedDateTime
 
 ### WMS Movement Commands
 
-Both commands are retry-safe: the same `externalRequestKey` with the same payload replays the first response (see `wmsDocumentRequests`). Quantities are in base units. Nothing is committed unless the whole request succeeds.
+All three commands are retry-safe: the same `externalRequestKey` with the same payload replays the first response (see `wmsDocumentRequests`). Quantities are in base units. Nothing is committed unless the whole request succeeds.
 
 | Endpoint | Page | Description |
 |---|---|---|
 | `POST movements` | 50220 WMS Movement API | Creates an Internal Movement and turns it into an Inventory Movement. Fails as a whole if any source bin is short or an item uses warehouse lot/serial/package tracking. |
 | `POST qtyToHandles` | 50221 WMS Qty. to Handle API | Sets Qty. to Handle on an inventory movement Take line and its Place line. Never registers. |
+| `POST putAwaySplits` | 50225 WMS Put-away Split API | Spreads one open Place line of an inventory put-away (from a purchase order) over one or more destination bins. Never posts. |
 
 **Create a movement:**
 ```json
@@ -135,6 +137,30 @@ The response returns `internalMovementNo`, `activityNo` and `responseJson`, whic
 ```
 `expectedLastModifiedDateTime` is optional. When sent, the request fails if either line changed in BC after that time.
 
+**Split an inventory put-away line over destination bins:**
+
+Managers create the inventory put-aways from purchase orders in BC and post them there (posting also posts the purchase receipt). The app only reads the open put-away lines (`warehouseActivityLines` with `activityType eq 'Invt. Put-away'`) and redistributes a Place line across bins. Once a put-away is posted, move stock on with `POST movements` instead.
+
+```json
+{
+  "externalRequestKey": "pa-2026-11-02-0001",
+  "createdBy": "jdoe",
+  "activityNo": "IPA000034",
+  "lineNo": 10000,
+  "allocationsJson": "[{\"binCode\":\"FP-14-25\",\"quantityBase\":12},{\"binCode\":\"BULK-01\",\"quantityBase\":36}]",
+  "expectedLastModifiedDateTime": "2026-11-02T17:05:00Z"
+}
+```
+- The `quantityBase` values must add up exactly to the line's Qty. Outstanding (Base), and each must be a whole number of the line's unit of measure (the purchase unit). Each bin may appear once and must not be blocked, dedicated or the adjustment bin.
+- The first allocation stays on the original line; BC's Split Line creates a line for each further allocation, right after it, in request order.
+- Qty. to Handle keeps the line's pattern: if it was 0 it stays 0 on every resulting line, if it was the full outstanding quantity each line gets its own full quantity. A partially set Qty. to Handle is rejected. Lines with lot, serial or package nos. are rejected.
+- `expectedLastModifiedDateTime` is optional. When sent, the request fails if the line changed in BC after that time.
+
+The response returns `sourceNo` (purchase order no.), `sourceLineNo`, `lastModifiedDateTime` and `responseJson`:
+```json
+{"activityNo":"IPA000034","sourceNo":"PO-1042","sourceLineNo":10000,"lines":[{"lineNo":10000,"binCode":"FP-14-25","quantityBase":12,"qtyToHandleBase":0},{"lineNo":15000,"binCode":"BULK-01","quantityBase":36,"qtyToHandleBase":0}],"lastModifiedDateTime":"2026-11-02T17:06:12.123Z"}
+```
+
 ### Setup for the WMS commands
 
 - **Inventory Setup:** Internal Movement Nos., Inventory Movement Nos. and Registered Invt. Movement Nos. must each point to a series with Default Nos. on.
@@ -142,7 +168,7 @@ The response returns `internalMovementNo`, `activityNo` and `responseJson`, whic
 - **Warehouse Employee:** the BC user that *makes the call* must be a Warehouse Employee at the location, or `POST movements` fails with `You cannot use Location Code ...`. For service-to-service calls that is the app registration's own BC user (see Microsoft Entra Applications); for delegated calls it is the signed-in user.
 - **Permissions:** assign the **WMS Integration** permission set to that user.
 
-`wmsDocumentRequests.workflowType` returns `Replenishment`, `QtyToHandle` or `BinLevels` (later also `BinSetup`, `MissingBinFill`, `PutAway`).
+`wmsDocumentRequests.workflowType` returns `Replenishment`, `QtyToHandle`, `BinLevels` or `PutAway` (later also `BinSetup`, `MissingBinFill`). For `PutAway`, `documentNo` is the purchase order no. and `activityNo` the inventory put-away no.
 
 ---
 
@@ -212,3 +238,7 @@ The response is displayed in a modal showing:
 | 50221 | Page (API) | WMS Qty. to Handle API |
 | 50222 | Page (API) | WMS Activity Line API |
 | 50223 | Page (API) | WMS Reg. Invt. Mvmt. Line API |
+| 50223 | Table | WMS Put-away Split Buffer |
+| 50223 | Codeunit | WMS Put-away Management |
+| 50225 | Page (API) | WMS Put-away Split API |
+| 50226 | Page (API) | WMS Posted Invt. PA Line API |
