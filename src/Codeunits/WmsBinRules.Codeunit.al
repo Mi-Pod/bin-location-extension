@@ -11,6 +11,10 @@ codeunit 50218 "WMS Bin Rules"
         BinDedicatedErr: Label 'Bin %1 in location %2 is Dedicated and cannot be used.', Comment = '%1 = bin code, %2 = location code';
         BinIsAdjustmentBinErr: Label 'Bin %1 is the adjustment bin of location %2 and cannot be used.', Comment = '%1 = bin code, %2 = location code';
         BinFixedToOtherItemErr: Label 'Bin %1 in location %2 is already Fixed to item %3 variant ''%4''. Set allowOtherFixedItem to assign another item.', Comment = '%1 = bin code, %2 = location code, %3 = item no., %4 = variant code';
+        ItemNotFoundErr: Label 'Item %1 does not exist.', Comment = '%1 = item no.';
+        ItemNotInventoryErr: Label 'Item %1 must be of type Inventory.', Comment = '%1 = item no.';
+        VariantNotFoundErr: Label 'Variant %1 does not exist for item %2.', Comment = '%1 = variant code, %2 = item no.';
+        UnitOfMeasureNotFoundErr: Label 'Unit of measure %1 does not exist for item %2.', Comment = '%1 = unit of measure code, %2 = item no.';
 
     procedure CheckBinUsable(LocationCode: Code[10]; BinCode: Code[20])
     var
@@ -60,5 +64,28 @@ codeunit 50218 "WMS Bin Rules"
         BinContent.SetFilter("Variant Code", '<>%1', VariantCode);
         if BinContent.FindFirst() then
             Error(BinFixedToOtherItemErr, BinCode, LocationCode, BinContent."Item No.", BinContent."Variant Code");
+    end;
+
+    procedure CheckItemVariantUnitOfMeasure(ItemNo: Code[20]; VariantCode: Code[10]; var UnitOfMeasureCode: Code[10])
+    var
+        Item: Record Item;
+        ItemUnitOfMeasure: Record "Item Unit of Measure";
+        ItemVariant: Record "Item Variant";
+    begin
+        // Checks the item can be put in a bin and defaults a blank unit of measure to the
+        // item's base unit, so callers can hash and store the value actually used.
+        if not Item.Get(ItemNo) then
+            Error(ItemNotFoundErr, ItemNo);
+        if Item.Type <> Item.Type::Inventory then
+            Error(ItemNotInventoryErr, ItemNo);
+
+        if VariantCode <> '' then
+            if not ItemVariant.Get(ItemNo, VariantCode) then
+                Error(VariantNotFoundErr, VariantCode, ItemNo);
+
+        if UnitOfMeasureCode = '' then
+            UnitOfMeasureCode := Item."Base Unit of Measure";
+        if not ItemUnitOfMeasure.Get(ItemNo, UnitOfMeasureCode) then
+            Error(UnitOfMeasureNotFoundErr, UnitOfMeasureCode, ItemNo);
     end;
 }
