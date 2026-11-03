@@ -27,7 +27,7 @@ codeunit 50223 "WMS Put-away Management"
         TrackedLineErr: Label 'Line %2 of inventory put-away %1 carries a lot, serial or package no. Put-aways for tracked items are not supported by this API.', Comment = '%1 = inventory put-away no., %2 = line no.';
         PartialQtyToHandleErr: Label 'Line %2 of inventory put-away %1 has Qty. to Handle %3 of %4 outstanding. Set it to 0 or to the full outstanding quantity in BC before splitting.', Comment = '%1 = inventory put-away no., %2 = line no., %3 = qty. to handle, %4 = qty. outstanding';
         LineChangedErr: Label 'Inventory put-away %1 line %2 was changed in BC after %3. Refresh and try again.', Comment = '%1 = inventory put-away no., %2 = line no., %3 = expected last modified date time';
-        NotWholeUnitErr: Label 'Allocation %1: quantityBase %2 is not a whole number of unit of measure %3 (Qty. per Unit of Measure %4, rounding precision %5) on line %6.', Comment = '%1 = allocation index, %2 = base qty, %3 = unit of measure code, %4 = qty. per unit of measure, %5 = rounding precision, %6 = line no.';
+        AllocationQuantityTok: Label 'Allocation %1: quantityBase', Comment = '%1 = allocation index (1-based)';
         SumMismatchErr: Label 'The allocations add up to %1, but line %2 of inventory put-away %3 has %4 outstanding (base). They must match exactly.', Comment = '%1 = sum of quantityBase, %2 = line no., %3 = inventory put-away no., %4 = qty. outstanding (base)';
         SplitResultMismatchErr: Label 'BC did not split line %2 of inventory put-away %1 as requested (allocation %3). Nothing was changed.', Comment = '%1 = inventory put-away no., %2 = line no., %3 = allocation index';
         PutAwaySplitMsg: Label 'Inventory put-away %1 line %2 spread over %3 bin(s) for purchase order %4.', Comment = '%1 = inventory put-away no., %2 = line no., %3 = number of bins, %4 = purchase order no.';
@@ -163,8 +163,6 @@ codeunit 50223 "WMS Put-away Management"
     local procedure CheckAllocations(WarehouseActivityLine: Record "Warehouse Activity Line"; BinCodes: List of [Code[20]]; QuantitiesBase: List of [Decimal])
     var
         WmsBinRules: Codeunit "WMS Bin Rules";
-        UnitOfMeasureManagement: Codeunit "Unit of Measure Management";
-        Qty: Decimal;
         TotalQtyBase: Decimal;
         AllocationIndex: Integer;
     begin
@@ -174,11 +172,9 @@ codeunit 50223 "WMS Put-away Management"
             WmsBinRules.CheckBinUsable(WarehouseActivityLine."Location Code", BinCodes.Get(AllocationIndex));
 
             // Lines are in the purchase unit of measure, so each share must be whole units of it.
-            Qty := QuantitiesBase.Get(AllocationIndex) / WarehouseActivityLine."Qty. per Unit of Measure";
-            if UnitOfMeasureManagement.RoundQty(Qty, WarehouseActivityLine."Qty. Rounding Precision") <> Qty then
-                Error(
-                    NotWholeUnitErr, AllocationIndex, QuantitiesBase.Get(AllocationIndex), WarehouseActivityLine."Unit of Measure Code",
-                    WarehouseActivityLine."Qty. per Unit of Measure", WarehouseActivityLine."Qty. Rounding Precision", WarehouseActivityLine."Line No.");
+            WmsBinRules.CheckWholeBaseQuantity(
+                StrSubstNo(AllocationQuantityTok, AllocationIndex), QuantitiesBase.Get(AllocationIndex),
+                WarehouseActivityLine."Qty. per Unit of Measure", WarehouseActivityLine."Unit of Measure Code");
 
             TotalQtyBase += QuantitiesBase.Get(AllocationIndex);
         end;

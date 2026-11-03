@@ -70,6 +70,7 @@ codeunit 50217 "WMS Bin Level Management"
         Item: Record Item;
         ItemUnitOfMeasure: Record "Item Unit of Measure";
         ItemVariant: Record "Item Variant";
+        WmsBinRules: Codeunit "WMS Bin Rules";
     begin
         if WmsBinLevelBuffer."Location Code" = '' then
             Error(FieldRequiredErr, LocationCodeTok);
@@ -98,6 +99,9 @@ codeunit 50217 "WMS Bin Level Management"
             Error(NegativeQtyErr, MinQtyTok, WmsBinLevelBuffer."Min. Qty.");
         if WmsBinLevelBuffer."Max. Qty." < 0 then
             Error(NegativeQtyErr, MaxQtyTok, WmsBinLevelBuffer."Max. Qty.");
+        // Min/Max are in the Bin Content's unit of measure.
+        WmsBinRules.CheckWholeQuantity(MinQtyTok, WmsBinLevelBuffer."Min. Qty.", WmsBinLevelBuffer."Unit of Measure Code");
+        WmsBinRules.CheckWholeQuantity(MaxQtyTok, WmsBinLevelBuffer."Max. Qty.", WmsBinLevelBuffer."Unit of Measure Code");
         if WmsBinLevelBuffer."Min. Qty." > WmsBinLevelBuffer."Max. Qty." then
             Error(MinAboveMaxErr, WmsBinLevelBuffer."Min. Qty.", WmsBinLevelBuffer."Max. Qty.");
     end;

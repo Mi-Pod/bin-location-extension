@@ -9,6 +9,7 @@ page 50219 "WMS Bin Level API"
     //
     // Optional: createdBy, variantCode, unitOfMeasureCode (defaults to the item's base UOM),
     // fixed (defaults to true), allowOtherFixedItem (defaults to false).
+    // minQty and maxQty are whole numbers of the unit of measure; fractions are refused (#10).
     // Send minQty 0 and maxQty 0 to clear the rule. Read the result back through binContents.
     //
     // The POST fires OnInsertRecord, which calls "WMS Bin Level Management" (50217). The table is

@@ -13,6 +13,7 @@ page 50221 "WMS Qty. to Handle API"
     //     "expectedLastModifiedDateTime": "2026-11-02T17:05:00Z"
     //   }
     //
+    // qtyToHandleBase must be a whole number of the lines' unit of measure; fractions are refused (#10).
     // expectedLastModifiedDateTime is optional; when sent, the request fails if either line was
     // changed in BC after it. The movement is never registered here.
     // The record is never persisted - the table is Temporary.

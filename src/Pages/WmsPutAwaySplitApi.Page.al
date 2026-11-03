@@ -15,7 +15,8 @@ page 50225 "WMS Put-away Split API"
     //   }
     //
     // The quantities must add up to the line's Qty. Outstanding (Base) and each must be a whole
-    // number of the line's unit of measure. expectedLastModifiedDateTime is optional.
+    // number of the line's unit of measure; fractions are refused whatever the unit's rounding
+    // precision (#10). expectedLastModifiedDateTime is optional.
     // Managers create and post the inventory put-aways in BC; nothing is posted here.
     // The record is never persisted - the table is Temporary.
 

@@ -102,7 +102,7 @@ Set the replenishment min/max for an item in a bin. Retry-safe: the same `extern
 
 Only `externalRequestKey`, `locationCode`, `binCode`, `itemNo`, `minQty` and `maxQty` are needed. `unitOfMeasureCode` defaults to the item's base unit, `fixed` to `true`, `allowOtherFixedItem` to `false`. Send `minQty` 0 and `maxQty` 0 to clear the rule; the Bin Content is kept. Quantities in the bin are never changed.
 
-The response echoes the stored values plus `binContentId`, `lastModifiedDateTime` and `result`. Requests fail if the bin is blocked, dedicated, the location's adjustment bin, or if `minQty` > `maxQty`. If the item isn't already Fixed in the bin and another item/variant is, the request also fails unless `allowOtherFixedItem` is `true`. Bins shared by several Fixed items can always have each item's levels set.
+The response echoes the stored values plus `binContentId`, `lastModifiedDateTime` and `result`. Requests fail if the bin is blocked, dedicated, the location's adjustment bin, if `minQty` > `maxQty`, or if either is not a whole number. If the item isn't already Fixed in the bin and another item/variant is, the request also fails unless `allowOtherFixedItem` is `true`. Bins shared by several Fixed items can always have each item's levels set.
 
 **`POST /api/mioneBrands/warehouse/v1.0/companies({id})/binSetups`**
 
@@ -155,6 +155,8 @@ Rules:
 ### WMS Movement Commands
 
 All three commands are retry-safe: the same `externalRequestKey` with the same payload replays the first response (see `wmsDocumentRequests`). Quantities are in base units. Nothing is committed unless the whole request succeeds.
+
+**No fractions:** every quantity sent to a WMS command (`movements`, `qtyToHandles`, `putAwaySplits`, `binLevels`) must be a whole number of the line's unit of measure, whatever the unit's Qty. Rounding Precision says. Anything else is refused with an error naming the field and value; nothing is rounded.
 
 | Endpoint | Page | Description |
 |---|---|---|

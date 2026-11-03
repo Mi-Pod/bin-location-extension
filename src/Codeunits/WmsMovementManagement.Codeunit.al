@@ -25,6 +25,7 @@ codeunit 50220 "WMS Movement Management"
         VariantNotFoundErr: Label 'Line %1: variant %2 does not exist for item %3.', Comment = '%1 = line index, %2 = variant code, %3 = item no.';
         WhseTrackedItemErr: Label 'Line %1: item %2 uses item tracking code %3 with warehouse lot, serial or package tracking. Movements for warehouse-tracked items are not supported by this API.', Comment = '%1 = line index, %2 = item no., %3 = item tracking code';
         QuantityNotPositiveErr: Label 'Line %1: quantityBase must be greater than 0.', Comment = '%1 = line index';
+        LineQuantityTok: Label 'Line %1: quantityBase', Comment = '%1 = line index (1-based)';
         SameBinErr: Label 'Line %1: fromBinCode and toBinCode must be different (both are %2).', Comment = '%1 = line index, %2 = bin code';
         BinNotFoundErr: Label 'Line %1: bin %2 does not exist at location %3.', Comment = '%1 = line index, %2 = bin code, %3 = location code';
         InsufficientStockErr: Label 'Line %1: bin %2 has only %3 of item %4 (variant ''%5'') available to take, but %6 was requested. Nothing was created.', Comment = '%1 = line index, %2 = bin code, %3 = available base qty, %4 = item no., %5 = variant code, %6 = requested base qty';
@@ -34,6 +35,7 @@ codeunit 50220 "WMS Movement Management"
         ActivityNoRequiredErr: Label 'activityNo is required.';
         TakeLineNoRequiredErr: Label 'takeLineNo is required.';
         QtyToHandleNegativeErr: Label 'qtyToHandleBase must not be negative.';
+        QtyToHandleBaseTok: Label 'qtyToHandleBase', Locked = true;
         TakeLineNotFoundErr: Label 'Inventory movement %1 has no line %2.', Comment = '%1 = inventory movement no., %2 = line no.';
         NotTakeLineErr: Label 'Line %2 of inventory movement %1 is a %3 line. takeLineNo must be a Take line.', Comment = '%1 = inventory movement no., %2 = line no., %3 = action type';
         PlaceLineNotFoundErr: Label 'No Place line was found for Take line %2 of inventory movement %1.', Comment = '%1 = inventory movement no., %2 = take line no.';
@@ -87,6 +89,7 @@ codeunit 50220 "WMS Movement Management"
         PlaceWarehouseActivityLine: Record "Warehouse Activity Line";
         WmsDocumentRequest: Record "WMS Document Request";
         WmsRequestManagement: Codeunit "WMS Request Management";
+        WmsBinRules: Codeunit "WMS Bin Rules";
         LastModifiedAt: DateTime;
         PayloadHash: Text[64];
         ResponseJson: Text;
@@ -120,6 +123,14 @@ codeunit 50220 "WMS Movement Management"
                (PlaceWarehouseActivityLine.SystemModifiedAt > WmsQtyToHandleBuffer."Expected Last Modified At")
             then
                 Error(LineChangedErr, WmsQtyToHandleBuffer."Activity No.", WmsQtyToHandleBuffer."Take Line No.", WmsQtyToHandleBuffer."Expected Last Modified At");
+
+        // Whole units of each line's unit of measure; checked on both in case they differ.
+        WmsBinRules.CheckWholeBaseQuantity(
+            QtyToHandleBaseTok, WmsQtyToHandleBuffer."Qty. to Handle (Base)",
+            TakeWarehouseActivityLine."Qty. per Unit of Measure", TakeWarehouseActivityLine."Unit of Measure Code");
+        WmsBinRules.CheckWholeBaseQuantity(
+            QtyToHandleBaseTok, WmsQtyToHandleBuffer."Qty. to Handle (Base)",
+            PlaceWarehouseActivityLine."Qty. per Unit of Measure", PlaceWarehouseActivityLine."Unit of Measure Code");
 
         // BC does not carry Qty. to Handle from a Take to its Place on inventory movements, so set both.
         SetLineQtyToHandle(TakeWarehouseActivityLine, WmsQtyToHandleBuffer."Qty. to Handle (Base)");
@@ -196,6 +207,7 @@ codeunit 50220 "WMS Movement Management"
         ItemVariant: Record "Item Variant";
         Bin: Record Bin;
         ItemTrackingManagement: Codeunit "Item Tracking Management";
+        WmsBinRules: Codeunit "WMS Bin Rules";
     begin
         if RequestInternalMovementLine."Item No." = '' then
             Error(ValueRequiredErr, LineIndex, 'itemNo');
@@ -211,6 +223,8 @@ codeunit 50220 "WMS Movement Management"
 
         if RequestInternalMovementLine."Qty. (Base)" <= 0 then
             Error(QuantityNotPositiveErr, LineIndex);
+        // The internal movement line uses the base unit, so the quantity must be whole base units.
+        WmsBinRules.CheckWholeQuantity(StrSubstNo(LineQuantityTok, LineIndex), RequestInternalMovementLine."Qty. (Base)", Item."Base Unit of Measure");
 
         if RequestInternalMovementLine."From Bin Code" = '' then
             Error(ValueRequiredErr, LineIndex, 'fromBinCode');

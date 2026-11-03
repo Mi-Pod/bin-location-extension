@@ -11,7 +11,8 @@ page 50220 "WMS Movement API"
     //     "linesJson": "[{\"itemNo\":\"1000\",\"variantCode\":\"\",\"fromBinCode\":\"BULK-01\",\"toBinCode\":\"FP-14-25\",\"quantityBase\":24}]"
     //   }
     //
-    // Quantities are in base units. The whole request fails if any source bin is short.
+    // Quantities are whole base units; fractions are refused (#10). The whole request fails if
+    // any source bin is short.
     // The response carries internalMovementNo, activityNo and responseJson, which lists the
     // created Take/Place line nos. per request line. Retrying with the same key replays it.
     // The record is never persisted - the table is Temporary.
