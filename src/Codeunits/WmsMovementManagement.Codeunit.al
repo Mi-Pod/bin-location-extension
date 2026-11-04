@@ -36,7 +36,9 @@ codeunit 50220 "WMS Movement Management"
         TakeLineNoRequiredErr: Label 'takeLineNo is required.';
         QtyToHandleNegativeErr: Label 'qtyToHandleBase must not be negative.';
         QtyToHandleBaseTok: Label 'qtyToHandleBase', Locked = true;
-        TakeLineNotFoundErr: Label 'Inventory movement %1 has no line %2.', Comment = '%1 = inventory movement no., %2 = line no.';
+        TakeLineNotFoundErr: Label 'Inventory movement or inventory put-away %1 has no line %2.', Comment = '%1 = inventory movement or put-away no., %2 = line no.';
+        PutAwayNotPlaceLineErr: Label 'Line %2 of inventory put-away %1 is a %3 line. takeLineNo must be a Place line for a put-away.', Comment = '%1 = inventory put-away no., %2 = line no., %3 = action type';
+        PutAwayLineChangedErr: Label 'Inventory put-away %1 line %2 was changed in BC after %3. Refresh and try again.', Comment = '%1 = inventory put-away no., %2 = line no., %3 = expected last modified date time';
         NotTakeLineErr: Label 'Line %2 of inventory movement %1 is a %3 line. takeLineNo must be a Take line.', Comment = '%1 = inventory movement no., %2 = line no., %3 = action type';
         PlaceLineNotFoundErr: Label 'No Place line was found for Take line %2 of inventory movement %1.', Comment = '%1 = inventory movement no., %2 = take line no.';
         LineChangedErr: Label 'Inventory movement %1 line %2 or its Place line was changed in BC after %3. Refresh and try again.', Comment = '%1 = inventory movement no., %2 = take line no., %3 = expected last modified date time';
@@ -87,6 +89,7 @@ codeunit 50220 "WMS Movement Management"
     var
         TakeWarehouseActivityLine: Record "Warehouse Activity Line";
         PlaceWarehouseActivityLine: Record "Warehouse Activity Line";
+        PutAwayWarehouseActivityLine: Record "Warehouse Activity Line";
         WmsDocumentRequest: Record "WMS Document Request";
         WmsRequestManagement: Codeunit "WMS Request Management";
         WmsBinRules: Codeunit "WMS Bin Rules";
@@ -111,8 +114,13 @@ codeunit 50220 "WMS Movement Management"
             exit;
         end;
 
-        if not TakeWarehouseActivityLine.Get(TakeWarehouseActivityLine."Activity Type"::"Invt. Movement", WmsQtyToHandleBuffer."Activity No.", WmsQtyToHandleBuffer."Take Line No.") then
-            Error(TakeLineNotFoundErr, WmsQtyToHandleBuffer."Activity No.", WmsQtyToHandleBuffer."Take Line No.");
+        if not TakeWarehouseActivityLine.Get(TakeWarehouseActivityLine."Activity Type"::"Invt. Movement", WmsQtyToHandleBuffer."Activity No.", WmsQtyToHandleBuffer."Take Line No.") then begin
+            // Inventory put-aways (from purchase orders) have Place lines only: takeLineNo is then that Place line.
+            if not PutAwayWarehouseActivityLine.Get(PutAwayWarehouseActivityLine."Activity Type"::"Invt. Put-away", WmsQtyToHandleBuffer."Activity No.", WmsQtyToHandleBuffer."Take Line No.") then
+                Error(TakeLineNotFoundErr, WmsQtyToHandleBuffer."Activity No.", WmsQtyToHandleBuffer."Take Line No.");
+            SetPutAwayQtyToHandle(WmsQtyToHandleBuffer, PutAwayWarehouseActivityLine, PayloadHash);
+            exit;
+        end;
         if TakeWarehouseActivityLine."Action Type" <> TakeWarehouseActivityLine."Action Type"::Take then
             Error(NotTakeLineErr, WmsQtyToHandleBuffer."Activity No.", WmsQtyToHandleBuffer."Take Line No.", TakeWarehouseActivityLine."Action Type");
         if not TakeWarehouseActivityLine.WmsFindPairedPlaceLine(PlaceWarehouseActivityLine) then
@@ -154,6 +162,50 @@ codeunit 50220 "WMS Movement Management"
         WmsDocumentRequest."Document No." := TakeWarehouseActivityLine."WMS Internal Movement No.";
         WmsDocumentRequest."Activity No." := TakeWarehouseActivityLine."No.";
         WmsDocumentRequest."Target Id" := TakeWarehouseActivityLine.SystemId;
+        WmsDocumentRequest.SetResponse(ResponseJson);
+        WmsRequestManagement.Register(WmsDocumentRequest);
+
+        FillQtyToHandleBuffer(WmsQtyToHandleBuffer, ResponseJson);
+    end;
+
+    // Qty. to Handle on one Inventory Put-away Place line (Pick-Ticket-Server#166). Same request
+    // key, replay and precondition rules as a movement; there is no paired line to keep in step.
+    // Never posts: a manager posts the put-away in BC.
+    local procedure SetPutAwayQtyToHandle(var WmsQtyToHandleBuffer: Record "WMS Qty. to Handle Buffer"; var PutAwayWarehouseActivityLine: Record "Warehouse Activity Line"; PayloadHash: Text[64])
+    var
+        WmsDocumentRequest: Record "WMS Document Request";
+        WmsRequestManagement: Codeunit "WMS Request Management";
+        WmsBinRules: Codeunit "WMS Bin Rules";
+        ResponseJson: Text;
+    begin
+        if PutAwayWarehouseActivityLine."Action Type" <> PutAwayWarehouseActivityLine."Action Type"::Place then
+            Error(PutAwayNotPlaceLineErr, WmsQtyToHandleBuffer."Activity No.", WmsQtyToHandleBuffer."Take Line No.", PutAwayWarehouseActivityLine."Action Type");
+
+        if WmsQtyToHandleBuffer."Expected Last Modified At" <> 0DT then
+            if PutAwayWarehouseActivityLine.SystemModifiedAt > WmsQtyToHandleBuffer."Expected Last Modified At" then
+                Error(PutAwayLineChangedErr, WmsQtyToHandleBuffer."Activity No.", WmsQtyToHandleBuffer."Take Line No.", WmsQtyToHandleBuffer."Expected Last Modified At");
+
+        // Whole units of the line's (purchase) unit of measure.
+        WmsBinRules.CheckWholeBaseQuantity(
+            QtyToHandleBaseTok, WmsQtyToHandleBuffer."Qty. to Handle (Base)",
+            PutAwayWarehouseActivityLine."Qty. per Unit of Measure", PutAwayWarehouseActivityLine."Unit of Measure Code");
+
+        // Standard validation enforces Qty. to Handle <= Qty. Outstanding.
+        SetLineQtyToHandle(PutAwayWarehouseActivityLine, WmsQtyToHandleBuffer."Qty. to Handle (Base)");
+        PutAwayWarehouseActivityLine.Get(PutAwayWarehouseActivityLine."Activity Type", PutAwayWarehouseActivityLine."No.", PutAwayWarehouseActivityLine."Line No.");
+
+        // The same line on both sides: takeLineNo and placeLineNo are that Place line.
+        ResponseJson := BuildQtyToHandleResponse(PutAwayWarehouseActivityLine, PutAwayWarehouseActivityLine, PutAwayWarehouseActivityLine.SystemModifiedAt);
+
+        WmsDocumentRequest.Init();
+        WmsDocumentRequest."External Request Key" := WmsQtyToHandleBuffer."External Request Key";
+        WmsDocumentRequest."Workflow Type" := "WMS Workflow Type"::QtyToHandle;
+        WmsDocumentRequest."Payload Hash" := PayloadHash;
+        WmsDocumentRequest."Location Code" := PutAwayWarehouseActivityLine."Location Code";
+        WmsDocumentRequest."Created By" := WmsQtyToHandleBuffer."Created By";
+        WmsDocumentRequest."Document No." := PutAwayWarehouseActivityLine."Source No.";
+        WmsDocumentRequest."Activity No." := PutAwayWarehouseActivityLine."No.";
+        WmsDocumentRequest."Target Id" := PutAwayWarehouseActivityLine.SystemId;
         WmsDocumentRequest.SetResponse(ResponseJson);
         WmsRequestManagement.Register(WmsDocumentRequest);
 
