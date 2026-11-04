@@ -70,5 +70,8 @@ permissionset 50216 "WMS Integration"
         table "WMS Put-away Split Buffer" = X,
         codeunit "WMS Put-away Management" = X,
         page "WMS Put-away Split API" = X,
-        page "WMS Posted Invt. PA Line API" = X;
+        page "WMS Posted Invt. PA Line API" = X,
+        // Level suggestions: shipped quantities per bin and day
+        tabledata "Warehouse Entry" = R,
+        query "WMS Bin Shipment API" = X;
 }
