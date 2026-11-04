@@ -1,7 +1,7 @@
 # Bin Location Extension
 
 **Publisher:** Mi-One Brands  
-**Version:** 1.2.1.0  
+**Version:** 1.3.0.0  
 **Platform:** Business Central 27.0 or later (runtime 16.0)
 
 A Business Central AL extension that exposes warehouse data through OData APIs for the Mi-One WMS (Pick-Ticket-Server). It provides:
@@ -44,6 +44,7 @@ All endpoints are under:
 | `warehouseActivityLines` | Warehouse Activity Line | Open activity lines (Take/Place pairs) with Qty. to Handle, outstanding and handled quantities, the source document fields (`sourceType`, `sourceSubtype`, `sourceNo`, `sourceLineNo`, `sourceDocument`, `dueDate`) and the WMS internal movement link fields. |
 | `registeredInvtMovementLines` | Registered Invt. Movement Line | Registered inventory movement lines with the original inventory movement no., registering date and the WMS link fields. |
 | `postedInvtPutAwayLines` | Posted Invt. Put-away Line | Posted inventory put-away lines with the purchase order (`sourceNo` / `sourceLineNo`), bin, quantities, and, from the header, the original inventory put-away no., posted receipt no. and posting date. |
+| `binShipments` | Warehouse Entry (query) | Units shipped out of each bin per day: net base quantity of sales order shipments and assembly consumption, one row per location, bin, item, variant and registering date (negative = out of the bin). Filter on `locationCode` and `registeringDate`. Used for level suggestions. |
 | `wmsDocumentRequests` | WMS Document Request | Every processed WMS command with its key, workflow type, document links and stored response (see [Request tracking](#request-tracking-and-retries)). |
 | `assemblyLinks` | Assemble-to-Order Link | ATO links between assembly headers and sales lines. |
 | `assemblyHeaders` | Assembly Header | Assembly order headers, including bin code, quantities and dates. |
@@ -409,3 +410,4 @@ ID range: 50201–50249 (BigCommerce uses 50250 and up).
 | 50224 | Page (API) | WMS Bin Setup API |
 | 50225 | Page (API) | WMS Put-away Split API |
 | 50226 | Page (API) | WMS Posted Invt. PA Line API |
+| 50227 | Query (API) | WMS Bin Shipment API |
