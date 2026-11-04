@@ -1,7 +1,7 @@
 # Bin Location Extension
 
 **Publisher:** Mi-One Brands  
-**Version:** 1.2.0.0  
+**Version:** 1.2.1.0  
 **Platform:** Business Central 27.0 or later (runtime 16.0)
 
 A Business Central AL extension that exposes warehouse data through OData APIs for the Mi-One WMS (Pick-Ticket-Server). It provides:
